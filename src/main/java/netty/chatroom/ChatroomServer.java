@@ -63,6 +63,8 @@ class ServerHandler extends ChannelInboundHandlerAdapter {
 	
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		cause.printStackTrace();
+		ChatroomServer.clients.remove(ctx.channel());
+		ctx.close();
+		System.out.println("Client disconnected. Resources are released. Current channel number: " + ChatroomServer.clients.size());
 	}
 }
