@@ -3,8 +3,6 @@ package netty.chatroom;
 import java.awt.TextArea;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -25,7 +23,9 @@ public class ChatroomClient {
 												  .handler(new ChannelInitializer<SocketChannel>() {
 														@Override
 														protected void initChannel(SocketChannel ch) throws Exception {
-															ch.pipeline().addLast(handler);
+															ch.pipeline().addLast(new ChatMessageEncoder())
+																		 .addLast(new ChatMessageDecoder())
+															     		 .addLast(handler);
 														}
 														  
 													})
@@ -40,7 +40,7 @@ public class ChatroomClient {
 		}
 	}
 	
-	public void sendMessage(String message) {
+	public void sendMessage(ChatMessage message) {
 		handler.sendMessage(message);
 	}
 }
@@ -60,16 +60,12 @@ class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 	
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		ByteBuf buf = (ByteBuf)msg;
-		byte[] destination = new byte[buf.readableBytes()];
-		buf.getBytes(buf.readerIndex(), destination);
-		String message = new String(destination);
-		area.setText(area.getText() + "\n" + message);
+		ChatMessage chatMessage = (ChatMessage)msg;
+		area.setText(area.getText() + "\n" + chatMessage);
 		
 	}
 	
-	public void sendMessage(String message) {
-		ByteBuf buf = Unpooled.copiedBuffer(message.getBytes());
-		ctx.writeAndFlush(buf);
+	public void sendMessage(ChatMessage message) {
+		ctx.writeAndFlush(message);
 	}
 }

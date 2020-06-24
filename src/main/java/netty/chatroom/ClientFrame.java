@@ -6,6 +6,7 @@ import java.awt.TextArea;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalTime;
 import java.util.Random;
 
 public class ClientFrame extends Frame{
@@ -24,13 +25,15 @@ public class ClientFrame extends Frame{
 		ChatroomClient client = new ChatroomClient();
 		new Thread(() -> {client.initialize(area);}).start();
 		
+		ChatMessage msg = new ChatMessage("", "", "Guest" + new Random().nextInt(1000));
 		
-		String prefix = String.format("Guest %d: ", new Random().nextInt(1000));
 		field.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				client.sendMessage(prefix + field.getText());
+				msg.setSendDate(LocalTime.now().toString());
+				msg.setMessage(field.getText());
+				client.sendMessage(msg);
 				field.setText("");
 			}
 		});
